@@ -6,6 +6,8 @@ using Dialogue.Logic.Constants;
 using Dialogue.Logic.Models;
 using Umbraco.Core.Models;
 using Umbraco.Web;
+using Umbraco.Core;
+using System.Diagnostics;
 
 namespace Dialogue.Logic
 {
@@ -151,6 +153,11 @@ namespace Dialogue.Logic
                 {
                     // Only do this is if we can't find the forum normally
                     forumNode = currentPage.DescendantOrSelf(AppConstants.DocTypeForumRoot);
+                    if (forumNode == null)
+                    {
+                        IEnumerable<IPublishedContent> publishedContent = new UmbracoHelper(UmbracoContext.Current).TypedContentAtRoot();
+                        forumNode = publishedContent.FirstOrDefault(x => x.DocumentTypeAlias == AppConstants.DocTypeForumRoot);
+                    }
                 }
                 HttpContext.Current.Items.Add(AppConstants.SiteSettingsKey, Settings(forumNode));
             }

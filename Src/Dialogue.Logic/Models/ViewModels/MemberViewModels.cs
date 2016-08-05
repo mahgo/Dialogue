@@ -20,6 +20,7 @@ namespace Dialogue.Logic.Models.ViewModels
 
         [Required]
         [DataType(DataType.EmailAddress)]
+        [EmailAddress]
         [DialogueDisplayName("Members.Label.EmailAddress")]
         public string Email { get; set; }
 
