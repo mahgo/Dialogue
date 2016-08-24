@@ -122,11 +122,10 @@ namespace Dialogue.Logic.Controllers
                 if (ModelState.IsValid)
                 {                   
                     var message = new GenericMessageViewModel();
-                    var user = new Member();
+                    var user = ServiceFactory.MemberService.Get(model.UserName);
                     if (ServiceFactory.MemberService.Login(model.UserName, model.Password))
                     {
                         // Set last login date
-                        user = ServiceFactory.MemberService.Get(model.UserName);
                         if (user.IsApproved && !user.IsLockedOut)
                         {
                             if (Url.IsLocalUrl(model.ReturnUrl) && model.ReturnUrl.Length > 1 && model.ReturnUrl.StartsWith("/")
@@ -149,7 +148,7 @@ namespace Dialogue.Logic.Controllers
                     }
                     else
                     {
-                        if (user.IsApproved)
+                        if (!user.IsApproved)
                         {
                             ModelState.AddModelError(string.Empty, Lang("Members.Errors.NotApproved"));
                         }
