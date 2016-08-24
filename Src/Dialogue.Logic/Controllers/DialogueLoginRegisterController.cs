@@ -587,7 +587,15 @@ namespace Dialogue.Logic.Controllers
                 }
             }
 
-            if (!success)
+            if (success)
+            {
+                ShowMessage(new GenericMessageViewModel
+                {
+                    Message = Lang("Members.ChangePassword.Success"),
+                    MessageType = GenericMessages.Success
+                });
+            }
+            else
             {
                 ModelState.AddModelError(string.Empty, Lang("Members.Errors.ResetPasswordInvalid"));
                 ShowModelErrors();
