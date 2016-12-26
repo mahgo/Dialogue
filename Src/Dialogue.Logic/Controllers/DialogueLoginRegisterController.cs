@@ -128,6 +128,8 @@ namespace Dialogue.Logic.Controllers
                         // Set last login date
                         if (user.IsApproved && !user.IsLockedOut)
                         {
+                            FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+
                             if (Url.IsLocalUrl(model.ReturnUrl) && model.ReturnUrl.Length >= 1 && model.ReturnUrl.StartsWith("/")
                                 && !model.ReturnUrl.StartsWith("//") && !model.ReturnUrl.StartsWith("/\\"))
                             {
