@@ -183,12 +183,14 @@ namespace Dialogue.Logic.Controllers
                                 Message = Lang("Members.NowApproved"),
                                 MessageType = GenericMessages.Success
                             });
-                        }
+
+                            return Redirect("~");
                     }
-                    catch (Exception ex)
-                    {
-                        LogError(ex);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    LogError(ex);
+                }
      
             }
 
