@@ -452,10 +452,9 @@ namespace Dialogue.Logic.Controllers
                     ShowModelErrors();
                     return Redirect(Settings.RegisterUrl);
                 }
-                return CurrentUmbracoPage();
+
+                return Redirect(Settings.LoginUrl);
             }
-
-
         }
 
         private void SendEmailConfirmationEmail(IMember userToSave)
