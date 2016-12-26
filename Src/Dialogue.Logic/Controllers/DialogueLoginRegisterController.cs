@@ -139,7 +139,7 @@ namespace Dialogue.Logic.Controllers
                             message.Message = Lang("Members.NowLoggedIn");
                             message.MessageType = GenericMessages.Success;
 
-                            return RedirectToUmbracoPage(Dialogue.Settings().ForumId);
+                            return Redirect("~");
                         }
                     }
 
