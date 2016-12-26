@@ -175,7 +175,7 @@ namespace Dialogue.Logic.Controllers
             }
 
             // Hack to show form validation
-            ShowModelErrors();
+            //ShowModelErrors();
 
             return CurrentUmbracoPage();
         }
