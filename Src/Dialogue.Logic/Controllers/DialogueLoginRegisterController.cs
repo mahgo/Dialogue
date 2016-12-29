@@ -150,7 +150,11 @@ namespace Dialogue.Logic.Controllers
                     }
                     else
                     {
-                        if (!user.IsApproved)
+                        if (user == null)
+                        {
+                            ModelState.AddModelError(string.Empty, Lang("Members.Errors.LogonGeneric"));
+                        }
+                        else if (!user.IsApproved)
                         {
                             ModelState.AddModelError(string.Empty, Lang("Members.Errors.NotApproved"));
                         }
