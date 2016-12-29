@@ -156,7 +156,7 @@ namespace Dialogue.Logic.Controllers
                         }
                         else if (!user.IsApproved)
                         {
-                            ModelState.AddModelError(string.Empty, Lang("Members.Errors.NotApproved"));
+                            this.ShowNotApprovedMessage(user.Id);
                         }
                         else if (user.IsLockedOut)
                         {
@@ -182,6 +182,21 @@ namespace Dialogue.Logic.Controllers
             //ShowModelErrors();
 
             return CurrentUmbracoPage();
+        }
+
+        public void ShowNotApprovedMessage(int userId)
+        {
+            GenericMessageViewModel message = new GenericMessageViewModel();
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Lang("Members.Errors.NotApproved") + " ");
+            sb.Append("<a href='" + Urls.GenerateUrl(Urls.UrlType.ResendEmailConfirmation) + "?id=" + userId + "'>" + Lang("Members.MemberEmailAuthorisationResend") + "</a>");
+            var fullMessage = sb.ToString();
+            if (!string.IsNullOrEmpty(fullMessage))
+            {
+                message.Message = string.Concat("<ul>", fullMessage, "</ul>");
+                message.MessageType = GenericMessages.Info;
+                ShowMessage(message);
+            }
         }
 
         [HttpPost]
@@ -431,7 +446,7 @@ namespace Dialogue.Logic.Controllers
                         unitOfWork.Commit();
 
                         // Only send the email if the admin is not manually authorising emails or it's pointless                        
-                        SendEmailConfirmationEmail(umbracoMember);
+                        AppHelpers.SendEmailConfirmationEmail(umbracoMember);
 
                         if (homeRedirect && !string.IsNullOrEmpty(forumReturnUrl))
                         {
@@ -458,44 +473,6 @@ namespace Dialogue.Logic.Controllers
                 }
 
                 return Redirect(Settings.LoginUrl);
-            }
-        }
-
-        private void SendEmailConfirmationEmail(IMember userToSave)
-        {
-            var manuallyAuthoriseMembers = Settings.ManuallyAuthoriseNewMembers;
-            var memberEmailAuthorisationNeeded = Settings.NewMembersMustConfirmAccountsViaEmail;
-            if (manuallyAuthoriseMembers == false && memberEmailAuthorisationNeeded)
-            {
-                if (!string.IsNullOrEmpty(userToSave.Email))
-                {
-                    // SEND AUTHORISATION EMAIL
-                    var sb = new StringBuilder();
-                    var confirmationLink = string.Concat(AppHelpers.ReturnCurrentDomain(), Urls.GenerateUrl(Urls.UrlType.EmailConfirmation), "?id=", userToSave.Id);
-                    sb.AppendFormat("<p>{0}</p>", string.Format(Lang("Members.MemberEmailAuthorisation.EmailBody"),
-                                                Settings.ForumName,
-                                                string.Format("<p><a href=\"{0}\">{0}</a></p>", confirmationLink)));
-                    var email = new Email
-                    {
-                        EmailFrom = Settings.NotificationReplyEmailAddress,
-                        EmailTo = userToSave.Email,
-                        NameTo = userToSave.Username,
-                        Subject = Lang("Members.MemberEmailAuthorisation.Subject")
-                    };
-                    email.Body = ServiceFactory.EmailService.EmailTemplate(email.NameTo, sb.ToString());
-                    ServiceFactory.EmailService.SendMail(email);
-
-                    // ADD COOKIE
-                    // We add a cookie for 7 days, which will display the resend email confirmation button
-                    // This cookie is removed when they click the confirmation link and they are logged in
-                    var myCookie = new HttpCookie(AppConstants.MemberEmailConfirmationCookieName)
-                    {
-                        Value = string.Format("{0}#{1}", userToSave.Id, userToSave.Username),
-                        Expires = DateTime.Now.AddDays(7)
-                    };
-                    // Add the cookie.
-                    Response.Cookies.Add(myCookie);
-                }
             }
         }
 

@@ -1971,6 +1971,34 @@ namespace Dialogue.Logic.Application
             }
         }
 
+        public static void SendEmailConfirmationEmail(IMember userToSave)
+        {
+            DialogueSettings settings = Dialogue.Settings();
+
+            var manuallyAuthoriseMembers = settings.ManuallyAuthoriseNewMembers;
+            var memberEmailAuthorisationNeeded = settings.NewMembersMustConfirmAccountsViaEmail;
+            if (manuallyAuthoriseMembers == false && memberEmailAuthorisationNeeded)
+            {
+                if (!string.IsNullOrEmpty(userToSave.Email))
+                {
+                    // SEND AUTHORISATION EMAIL
+                    var sb = new StringBuilder();
+                    var confirmationLink = string.Concat(AppHelpers.ReturnCurrentDomain(), Urls.GenerateUrl(Urls.UrlType.EmailConfirmation), "?id=", userToSave.Id);
+                    sb.AppendFormat("<p>{0}</p>", string.Format(Lang("Members.MemberEmailAuthorisation.EmailBody"),
+                                                settings.ForumName,
+                                                string.Format("<p><a href=\"{0}\">{0}</a></p>", confirmationLink)));
+                    var email = new Email
+                    {
+                        EmailFrom = settings.NotificationReplyEmailAddress,
+                        EmailTo = userToSave.Email,
+                        NameTo = userToSave.Username,
+                        Subject = Lang("Members.MemberEmailAuthorisation.Subject")
+                    };
+                    email.Body = ServiceFactory.EmailService.EmailTemplate(email.NameTo, sb.ToString());
+                    ServiceFactory.EmailService.SendMail(email);
+                }
+            }
+        }
     }
 
 }

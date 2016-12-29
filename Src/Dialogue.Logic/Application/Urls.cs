@@ -42,7 +42,8 @@ namespace Dialogue.Logic.Application
             ChangePassword,
             EmailConfirmation,
             SpamOverview,
-            Authorise
+            Authorise,
+            ResendEmailConfirmation
         }
 
         public static string UrlTypeName(UrlType e)
@@ -61,6 +62,8 @@ namespace Dialogue.Logic.Application
                     return GenerateUrl(UrlType.Dialogue, AppConstants.PageUrlCreateTopic);
                 case UrlType.EmailConfirmation:
                     return GenerateUrl(UrlType.Dialogue, AppConstants.PageUrlEmailConfirmation);
+                case UrlType.ResendEmailConfirmation:
+                    return GenerateUrl(UrlType.Dialogue, AppConstants.PageUrlResendEmailConfirmation);
                 case UrlType.Leaderboard:
                     return GenerateUrl(UrlType.Dialogue, AppConstants.PageUrlLeaderboard);
                 case UrlType.Activity:

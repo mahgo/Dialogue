@@ -103,6 +103,9 @@ namespace Dialogue.Logic.Controllers
                 case AppConstants.PageUrlEmailConfirmation:
                     return EmailConfirmation(page);
 
+                case AppConstants.PageUrlResendEmailConfirmation:
+                    return ResendEmailConfirmation(page);
+
                 case AppConstants.PageUrlSpamOverview:
                     return SpamOverview(page);
 
@@ -195,6 +198,30 @@ namespace Dialogue.Logic.Controllers
             }
 
             return ErrorToHomePage(Lang("Errors.GenericMessage"));
+        }
+
+        public ActionResult ResendEmailConfirmation(DialoguePage page)
+        {
+            string idString = Request["id"];
+            if (!string.IsNullOrEmpty(idString))
+            {
+                int id;
+                if (int.TryParse(idString, out id))
+                {
+                    IMember member = Services.MemberService.GetById(id);
+                    if (member != null)
+                    {
+                        AppHelpers.SendEmailConfirmationEmail(member);
+
+                        GenericMessageViewModel userMessage = new GenericMessageViewModel();
+                        userMessage.Message = Lang("Members.MemberEmailAuthorisationNeeded");
+                        userMessage.MessageType = GenericMessages.Success;
+                        ShowMessage(userMessage);
+                    }
+                }
+            }
+
+            return Redirect(Settings.LoginUrl);
         }
 
         public ActionResult Create(DialoguePage page)
