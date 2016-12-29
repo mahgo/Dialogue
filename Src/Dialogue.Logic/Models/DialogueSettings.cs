@@ -41,6 +41,7 @@ namespace Dialogue.Logic.Models
         public bool AllowPrivateMessages { get; set; }
         public int PrivateMessageInboxSize { get; set; }
         public int PrivateMessageFloodControl { get; set; }
+        public string DefaultAvatar { get; set; }
         
         // Points
         public bool AllowPoints { get; set; }

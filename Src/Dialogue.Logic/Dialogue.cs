@@ -74,6 +74,7 @@ namespace Dialogue.Logic
                 settings.AllowPrivateMessages = forumRootNode.GetPropertyValue<bool>("allowPrivateMessages");
                 settings.PrivateMessageInboxSize = forumRootNode.GetPropertyValue<int>("privateMessageInboxSize");
                 settings.PrivateMessageFloodControl = forumRootNode.GetPropertyValue<int>("privateMessageFloodControl");
+                settings.DefaultAvatar = forumRootNode.GetPropertyValue<string>("defaultAvatar");
 
                 // Points
                 settings.AllowPoints = forumRootNode.GetPropertyValue<bool>("allowPoints");

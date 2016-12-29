@@ -61,6 +61,19 @@ namespace Dialogue.Logic.Application
                 // Has an avatar image
                 return VirtualPathUtility.ToAbsolute(string.Concat("~/", avatar, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
             }
+
+            string defaultAvatar = Dialogue.Settings().DefaultAvatar;
+            if (!string.IsNullOrEmpty(defaultAvatar))
+            {
+                dynamic consoleArtMedia = UmbHelper().Media(defaultAvatar);
+                string imageUrl = consoleArtMedia?.Url;
+
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    return VirtualPathUtility.ToAbsolute(string.Concat("~/", imageUrl, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
+                }
+            }
+
             return GetGravatarImage(email, size);
         }
 
