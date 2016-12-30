@@ -75,18 +75,28 @@ namespace Dialogue.Logic.Application
             return HttpContext.Current.Items[AppConstants.DefaultAvatarKey] as string;
         }
 
-        public static string MemberImage(string avatar, string email, int userId, int size)
+        public static string MemberImage(string avatar, string email, int userId, int size, bool centerCrop = true)
         {
+            string formatString;
+            if (centerCrop)
+            {
+                formatString = "?width={0}&height={0}&mode=crop";
+            }
+            else
+            {
+                formatString = "?width={0}&crop=0,0,{0},{0}";
+            }
+
             if (!string.IsNullOrEmpty(avatar))
             {
                 // Has an avatar image
-                return VirtualPathUtility.ToAbsolute(string.Concat("~/", avatar, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
+                return VirtualPathUtility.ToAbsolute(string.Concat("~/", avatar, string.Format(formatString, size)));
             }
 
             string defaultImage = DefaultImage();
             if (!string.IsNullOrEmpty(defaultImage))
             {
-                return VirtualPathUtility.ToAbsolute(string.Concat("~/", defaultImage, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
+                return VirtualPathUtility.ToAbsolute(string.Concat("~/", defaultImage, string.Format(formatString, size)));
             }
 
             return GetGravatarImage(email, size);
