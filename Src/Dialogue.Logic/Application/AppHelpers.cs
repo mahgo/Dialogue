@@ -54,6 +54,27 @@ namespace Dialogue.Logic.Application
             return sBuilder.ToString();  // Return the hexadecimal string.
         }
 
+        public static string DefaultImage()
+        {
+            if (!HttpContext.Current.Items.Contains(AppConstants.DefaultAvatarKey))
+            {
+                string defaultAvatar = Dialogue.Settings().DefaultAvatar;
+                if (!string.IsNullOrEmpty(defaultAvatar))
+                {
+                    dynamic consoleArtMedia = UmbHelper().Media(defaultAvatar);
+                    string imageUrl = consoleArtMedia?.Url;
+
+                    HttpContext.Current.Items.Add(AppConstants.DefaultAvatarKey, imageUrl);
+                }
+                else
+                {
+                    HttpContext.Current.Items.Add(AppConstants.DefaultAvatarKey, string.Empty);
+                }
+            }
+
+            return HttpContext.Current.Items[AppConstants.DefaultAvatarKey] as string;
+        }
+
         public static string MemberImage(string avatar, string email, int userId, int size)
         {
             if (!string.IsNullOrEmpty(avatar))
@@ -62,16 +83,10 @@ namespace Dialogue.Logic.Application
                 return VirtualPathUtility.ToAbsolute(string.Concat("~/", avatar, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
             }
 
-            string defaultAvatar = Dialogue.Settings().DefaultAvatar;
-            if (!string.IsNullOrEmpty(defaultAvatar))
+            string defaultImage = DefaultImage();
+            if (!string.IsNullOrEmpty(defaultImage))
             {
-                dynamic consoleArtMedia = UmbHelper().Media(defaultAvatar);
-                string imageUrl = consoleArtMedia?.Url;
-
-                if (!string.IsNullOrEmpty(imageUrl))
-                {
-                    return VirtualPathUtility.ToAbsolute(string.Concat("~/", imageUrl, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
-                }
+                return VirtualPathUtility.ToAbsolute(string.Concat("~/", defaultImage, string.Format("?width={0}&crop=0,0,{0},{0}", size)));
             }
 
             return GetGravatarImage(email, size);

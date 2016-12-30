@@ -15,6 +15,7 @@ namespace Dialogue.Logic.Constants
         public const string MessageViewBagName = "ViewBagKeyHere";
         public const string PartialCachePrefix = "tonystark-";
         public const string SiteSettingsKey = "our-sitesettings";
+        public const string DefaultAvatarKey = "default-avatar";
 
         public const string ViewMacroDirectory = "~/Views/MacroPartials/";
         public const string MemberEmailConfirmationCookieName = "MVCForumEmailConfirmation";
