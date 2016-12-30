@@ -559,6 +559,79 @@ namespace Dialogue.Logic.Services
             return hashedToken;
         }
 
+        public void SendEmailConfirmationEmail(IMember userToSave)
+        {
+            DialogueSettings settings = Dialogue.Settings();
+
+            var manuallyAuthoriseMembers = settings.ManuallyAuthoriseNewMembers;
+            var memberEmailAuthorisationNeeded = settings.NewMembersMustConfirmAccountsViaEmail;
+            if (manuallyAuthoriseMembers == false && memberEmailAuthorisationNeeded)
+            {
+                if (!string.IsNullOrEmpty(userToSave.Email))
+                {
+                    // Generate token 
+                    string token = Guid.NewGuid().ToString().Replace("-", "");
+
+                    // SEND AUTHORISATION EMAIL
+                    var sb = new StringBuilder();
+                    var confirmationLink = string.Concat(AppHelpers.ReturnCurrentDomain(), Urls.GenerateUrl(Urls.UrlType.EmailConfirmation), "?id=", userToSave.Id + "&token=" + token);
+                    sb.AppendFormat("<p>{0}</p>", string.Format(AppHelpers.Lang("Members.MemberEmailAuthorisation.EmailBody"),
+                                                settings.ForumName,
+                                                string.Format("<p><a href=\"{0}\">{0}</a></p>", confirmationLink)));
+                    var email = new Email
+                    {
+                        EmailFrom = settings.NotificationReplyEmailAddress,
+                        EmailTo = userToSave.Email,
+                        NameTo = userToSave.Username,
+                        Subject = AppHelpers.Lang("Members.MemberEmailAuthorisation.Subject")
+                    };
+                    email.Body = ServiceFactory.EmailService.EmailTemplate(email.NameTo, sb.ToString());
+                    ServiceFactory.EmailService.SendMail(email);
+
+                    // Saved hashed token and date
+                    string hashedToken = this.HashToken(token);
+                    userToSave.SetValue("confirmationtoken", hashedToken);
+
+                    DateTime expiryTime = DateTime.UtcNow.AddDays(7);
+                    string expiryTimeString = expiryTime.ToString("ddMMyyyyHHmmssFFFF");
+                    userToSave.SetValue("confirmationtokenexpiry", expiryTimeString);
+
+                    _memberService.Save(userToSave);   
+                }
+            }
+        }
+
+        public bool ConfirmationTokenValid(IMember user, string token)
+        {
+            bool success = false;
+            string memberToken = user.GetValue<string>("confirmationtoken");
+            string hashedToken = this.HashToken(token);
+
+            // See if the reset token matches the value on the member property
+            if (memberToken == hashedToken)
+            {
+                // Got a match, now check to see if the time window hasnt expired
+                string resetTokenExpiry = user.GetValue<string>("confirmationtokenexpiry");
+                DateTime expiryTime = DateTime.ParseExact(resetTokenExpiry, "ddMMyyyyHHmmssFFFF", null);
+
+                // Check the current time is less than the expiry time
+                DateTime currentTime = DateTime.UtcNow;
+
+                // Check if date has NOT expired (been and gone)
+                if (currentTime.CompareTo(expiryTime) < 0)
+                {
+                    // Remove the resetToken value
+                    user.SetValue("confirmationtoken", string.Empty);
+                    user.SetValue("confirmationtokenexpiry", string.Empty);
+                    _memberService.Save(user);
+
+                    success = true;
+                }
+            }
+
+            return success;
+        }
+
         #endregion
 
         #region Member Groups

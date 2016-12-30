@@ -153,51 +153,52 @@ namespace Dialogue.Logic.Controllers
 
         public ActionResult EmailConfirmation(DialoguePage page)
         {
-            var id = Request["id"];
-            if (id != null)
+            string id = Request["id"];
+            string token = Request["token"];
+            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(token))
             {
-                    try
+                try
+                {
+                    int userId;
+                    if (int.TryParse(id, out userId))
                     {
-                        var user = ServiceFactory.MemberService.Get(Convert.ToInt32(id));
+                        IMember resetMember = Services.MemberService.GetById(userId);
 
                         // Checkconfirmation
-                        if (user != null)
+                        if (resetMember != null)
                         {
-                            // Set the user to active
-                            user.IsApproved = true;
-
-                            // Delete Cookie and log them in if this cookie is present
-                            if (Request.Cookies[AppConstants.MemberEmailConfirmationCookieName] != null)
+                            if (ServiceFactory.MemberService.ConfirmationTokenValid(resetMember, token))
                             {
-                                var myCookie = new HttpCookie(AppConstants.MemberEmailConfirmationCookieName)
+                                // Set the user to active
+                                resetMember.IsApproved = true;
+                                Services.MemberService.Save(resetMember);
+
+                                // Show a new message
+                                // We use temp data because we are doing a redirect
+                                ShowMessage(new GenericMessageViewModel
                                 {
-                                    Expires = DateTime.Now.AddDays(-1)
-                                };
-                                Response.Cookies.Add(myCookie);
+                                    Message = Lang("Members.NowApproved"),
+                                    MessageType = GenericMessages.Success
+                                });
 
-                                // Login code
-                                FormsAuthentication.SetAuthCookie(user.UserName, false);
+                                return Redirect(Settings.LoginUrl);
                             }
-
-                            // Show a new message
-                            // We use temp data because we are doing a redirect
-                            ShowMessage(new GenericMessageViewModel
-                            {
-                                Message = Lang("Members.NowApproved"),
-                                MessageType = GenericMessages.Success
-                            });
-
-                            return Redirect("~");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     LogError(ex);
                 }
-     
             }
 
-            return ErrorToHomePage(Lang("Errors.GenericMessage"));
+            ShowMessage(new GenericMessageViewModel
+            {
+                Message = Lang("Errors.GenericMessage"),
+                MessageType = GenericMessages.Danger
+            });
+
+            return Redirect(Settings.LoginUrl);
         }
 
         public ActionResult ResendEmailConfirmation(DialoguePage page)
@@ -211,7 +212,7 @@ namespace Dialogue.Logic.Controllers
                     IMember member = Services.MemberService.GetById(id);
                     if (member != null)
                     {
-                        AppHelpers.SendEmailConfirmationEmail(member);
+                        ServiceFactory.MemberService.SendEmailConfirmationEmail(member);
 
                         GenericMessageViewModel userMessage = new GenericMessageViewModel();
                         userMessage.Message = Lang("Members.MemberEmailAuthorisationNeeded");

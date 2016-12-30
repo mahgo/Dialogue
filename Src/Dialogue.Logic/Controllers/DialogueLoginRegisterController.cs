@@ -446,7 +446,7 @@ namespace Dialogue.Logic.Controllers
                         unitOfWork.Commit();
 
                         // Only send the email if the admin is not manually authorising emails or it's pointless                        
-                        AppHelpers.SendEmailConfirmationEmail(umbracoMember);
+                        ServiceFactory.MemberService.SendEmailConfirmationEmail(umbracoMember);
 
                         if (homeRedirect && !string.IsNullOrEmpty(forumReturnUrl))
                         {
