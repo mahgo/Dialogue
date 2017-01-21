@@ -47,21 +47,21 @@ namespace Dialogue.Logic.Events
 
             PageCacheRefresher.CacheUpdated += PageCacheRefresher_CacheUpdated;
 
-            // Sync the badges
-            // Do the badge processing
-            var unitOfWorkManager = new UnitOfWorkManager(ContextPerRequest.Db);
-            using (var unitOfWork = unitOfWorkManager.NewUnitOfWork())
-            {
-                try
-                {
-                    ServiceFactory.BadgeService.SyncBadges();
-                    unitOfWork.Commit();
-                }
-                catch (Exception ex)
-                {
-                    AppHelpers.LogError(string.Format("Error processing badge classes: {0}", ex.Message));
-                }
-            }
+            //// Sync the badges
+            //// Do the badge processing
+            //var unitOfWorkManager = new UnitOfWorkManager(ContextPerRequest.Db);
+            //using (var unitOfWork = unitOfWorkManager.NewUnitOfWork())
+            //{
+            //    try
+            //    {
+            //        ServiceFactory.BadgeService.SyncBadges();
+            //        unitOfWork.Commit();
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        AppHelpers.LogError(string.Format("Error processing badge classes: {0}", ex.Message));
+            //    }
+            //}
 
         }
 
